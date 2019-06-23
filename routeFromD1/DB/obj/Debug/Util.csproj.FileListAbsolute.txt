@@ -1,0 +1,10 @@
+E:\workplace\window\routeFromD\DB\bin\Debug\DB.dll
+E:\workplace\window\routeFromD\DB\bin\Debug\DB.pdb
+E:\workplace\window\routeFromD\DB\obj\Debug\DB.dll
+E:\workplace\window\routeFromD\DB\obj\Debug\DB.pdb
+E:\workplace\window\routeFromD\DB\obj\Debug\Util.csproj.CoreCompileInputs.cache
+E:\workplace\window\routeFromD1\DB\bin\Debug\DB.dll
+E:\workplace\window\routeFromD1\DB\bin\Debug\DB.pdb
+E:\workplace\window\routeFromD1\DB\obj\Debug\Util.csproj.CoreCompileInputs.cache
+E:\workplace\window\routeFromD1\DB\obj\Debug\DB.dll
+E:\workplace\window\routeFromD1\DB\obj\Debug\DB.pdb
