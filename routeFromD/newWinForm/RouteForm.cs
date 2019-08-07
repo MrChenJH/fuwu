@@ -53,7 +53,7 @@ namespace WindowsRouteFormD
             //{
             //    if (Convert.ToString(fistShift.Rows[0]["计划发车时间"]).Equals(Convert.ToString(formR["计划发"])))
             //    {
-            //        string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
+            //        string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
             //        DataTable jsysqldata = SqlHelper.ExecuteDataTable(jsysql);
             //        if (jsysqldata.Rows.Count > 0)
             //        {
@@ -69,7 +69,7 @@ namespace WindowsRouteFormD
             //    }
             //}
 
-            textBox1.AppendText("\\n\\t" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd HH:mm:ss") + "\\n\\t" + progressText);
+            textBox1.AppendText("\\n\\t" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\\n\\t" + progressText);
 
         }
 
@@ -96,13 +96,13 @@ namespace WindowsRouteFormD
         private void RunJsy()
         {
 
-            string sql = "select 内部编号,convert(varchar(19), min(计划发车时刻),121)  计划发车时刻 from tblRouteRFormD where isnull(驾驶员,'')='' and 日期='" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "' group by 内部编号";
+            string sql = "select 内部编号,convert(varchar(19), min(计划发车时刻),121)  计划发车时刻 from tblRouteRFormD where isnull(驾驶员,'')='' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' group by 内部编号";
             DataTable data = SqlHelper.ExecuteDataTable(sql);
             for (var i = 0; i < data.Rows.Count; i++)
             {
                 string 内部编号 = Convert.ToString(data.Rows[i]["内部编号"]);
                 string 计划发车时刻 = Convert.ToString(data.Rows[i]["计划发车时刻"]);
-                string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
+                string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
                 DataTable jsysqldata = SqlHelper.ExecuteDataTable(jsysql);
                 if (jsysqldata.Rows.Count > 0)
                 {
@@ -124,19 +124,24 @@ namespace WindowsRouteFormD
         /// </summary>
         private void ProcessNonFormD()
         {
-            string sql = "  select 流水号,起点,终点 from tblRouteRFormD where 方向='出场' or 方向='入场' and 日期='" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "' and 状态=2";
-
-            DataTable sqlData = SqlHelper.ExecuteDataTable(sql);
-
-            for (int i = 0; i < sqlData.Rows.Count; i++)
+            while (true)
             {
+                System.Threading.Thread.Sleep(1000);
+                string sql = "  select 流水号,起点,终点 from tblRouteRFormD where 方向='出场' or 方向='入场' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and 状态!=2";
 
-                string tblAsql = "select 里程 from tblAppearancesData where 开出站名='" + Convert.ToString(sqlData.Rows[0]["起点"]) + "' and 到达站名='" + Convert.ToString(sqlData.Rows[0]["终点"]) + "'";
+                DataTable sqlData = SqlHelper.ExecuteDataTable(sql);
 
-                DataTable tblData = SqlHelper.ExecuteDataTable(tblAsql);
-                if (tblData.Rows.Count > 0)
+                for (int i = 0; i < sqlData.Rows.Count; i++)
                 {
-                    string upDateSQL = "UPDATE tblRouteRFormD SET 单程里程='" + Convert.ToString(tblData.Rows[0]["里程"]) + "' where 流水号='" + Convert.ToString(sqlData.Rows[i]["流水号"]) + "'";
+
+                    string tblAsql = "select 里程 from tblAppearancesData where 开出站名='" + Convert.ToString(sqlData.Rows[0]["起点"]) + "' and 到达站名='" + Convert.ToString(sqlData.Rows[0]["终点"]) + "'";
+
+                    DataTable tblData = SqlHelper.ExecuteDataTable(tblAsql);
+                    if (tblData.Rows.Count > 0)
+                    {
+                        string upDateSQL = "UPDATE tblRouteRFormD SET 单程里程='" + Convert.ToString(tblData.Rows[0]["里程"]) + "',状态=2,备注=1     where 流水号='" + Convert.ToString(sqlData.Rows[i]["流水号"]) + "'";
+                        SqlHelper.ExuteNonQuery(upDateSQL);
+                    }
                 }
             }
         }
@@ -150,14 +155,14 @@ namespace WindowsRouteFormD
             {
                 string 空调 = "0";
 
-                if (DateTime.Now.AddDays(-1).Month >= 5 && DateTime.Now.AddDays(-1).Month <= 9)
+                if (DateTime.Now.Month >= 5 && DateTime.Now.Month <= 9)
                 {
                     空调 = "1";
                 }
 
 
 
-                string sql = "select 线路ID from tblRouteRFormD  where 日期 ='2019-07-28'    group by 线路ID";
+                string sql = "select 线路ID from tblRouteRFormD  where 日期 ='" + DateTime.Now.ToString("yyyy-MM-dd") + "'    group by 线路ID";
 
                 var routeData = SqlHelper.ExecuteDataTable(sql);
                 //ParallelLoopResult result = Parallel.ForEach(routeData.AsEnumerable(), (baseRow, pls, longs) =>
@@ -166,7 +171,7 @@ namespace WindowsRouteFormD
                 {
                     string 线路ID = Convert.ToString(baseRow["线路ID"]);
                     sql = "select  流水号,CONVERT(varchar(10),日期,120) 日期,线路ID,内部编号,起点,终点,方向,CONVERT(varchar,计划发车时刻,108) 计划发,驾驶员,ISNULL(状态,0) 状态  from  [tblRouteRFormD] " +
-                                                         "   where ISNULL(状态,0)!=2 and  [线路ID]='" + Convert.ToString(baseRow["线路ID"]) + @"' and  日期='2019-07-28'  and 备注='255'  ";
+                                                         "   where ISNULL(状态,0)!=2 and  [线路ID]='" + Convert.ToString(baseRow["线路ID"]) + @"' and  日期='"+DateTime.Now.ToString("yyyy-MM-dd") +"'  and 备注='255'  ";
                     LogHelper.WriteLog(sql);
 
                     var dt = SqlHelper.ExecuteDataTable(sql);
@@ -177,11 +182,11 @@ namespace WindowsRouteFormD
                         try
                         {
                             string 内部编号 = Convert.ToString(formR["内部编号"]);
-
+                            string 终点 = Convert.ToString(formR["终点"]);
                             string 方向 = Convert.ToString(formR["方向"]);
-                            string 计划发 = string.Format("{0} {1}", DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), Convert.ToString(formR["计划发"]));
+                            string 计划发 = string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(formR["计划发"]));
 
-                            string 第一步 = @"select  isnull(min(流水号),0) 流水号 from tblRouteRFormX" + DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + @"
+                            string 第一步 = @"select  isnull(min(流水号),0) 流水号 from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
                                               where 内部编号 = '" + 内部编号 + @"'
                                               and 驶离时刻>'" + 计划发 + @"'
                                               and 方向='" + Convert.ToString(formR["方向"]) + @"'
@@ -205,16 +210,16 @@ namespace WindowsRouteFormD
                                 string lbfcsj = string.Empty;
                                 string pbjhlsh = string.Empty;
 
-                                string 查找路牌以及路牌发车时间语句 = "select  流水号,路牌,CONVERT(varchar,计划发车时间,108)  计划发车   from tbldailyplan1 where 内部编号='" + 内部编号 + "' and  CONVERT(varchar,预估发车时间,108)='" + Convert.ToString(formR["计划发"]) + "' and 日期='" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "'";
+                                string 查找路牌以及路牌发车时间语句 = "select  流水号,路牌,CONVERT(varchar,计划发车时间,108)  计划发车   from tbldailyplan1 where 内部编号='" + 内部编号 + "' and  CONVERT(varchar,预估发车时间,108)='" + Convert.ToString(formR["计划发"]) + "' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
                                 var 路牌以及路牌发车时间集合 = SqlHelper.ExecuteDataTable(查找路牌以及路牌发车时间语句);
                                 lb = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["路牌"]);
-                                lbfcsj = string.Format("{0} {1}", DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["计划发车"]));
+                                lbfcsj = string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["计划发车"]));
                                 pbjhlsh = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["流水号"]);
 
                                 if (Convert.ToString(formR["状态"]).Equals("0"))
                                 {
                                     string 第二步 = @"select top 20  convert(varchar(19), 到达时刻,121) 到达时刻,convert(varchar(19), 驶离时刻,121) 驶离时刻,站序  
-                                              from tblRouteRFormX" + DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + @"
+                                              from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
                                               where 内部编号 = '" + 内部编号 + @"'
                                               and 流水号<='" + 流水号 + @"'
                                               and 线路ID = '" + 线路ID + "'  order by 流水号 desc ";
@@ -232,7 +237,7 @@ namespace WindowsRouteFormD
                                                 LogHelper.WriteLog(_dailySql);
                                                 if (dailyTable.Rows.Count > 0)
                                                 {
-                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
                                                     string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
                                                     string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
                                                     string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
@@ -270,7 +275,7 @@ namespace WindowsRouteFormD
                                                 LogHelper.WriteLog(_dailySql);
                                                 if (dailyTable.Rows.Count > 0)
                                                 {
-                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
                                                     string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
                                                     string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
                                                     string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
@@ -354,7 +359,7 @@ namespace WindowsRouteFormD
 
 
                                     //        string 第五步 = "update tblRouteRFormD " +
-                                    //       "            set 实际到达时刻 = '" + string.Format("{0} {1}", DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), Convert.ToString(lastplans.Rows[0]["计划到达时间"])) + "'," +
+                                    //       "            set 实际到达时刻 = '" + string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(lastplans.Rows[0]["计划到达时间"])) + "'," +
                                     //       "                状态=2,单程里程='" + fs.长度 + "'" +
                                     //       "   where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
                                     //        SqlHelper.ExuteNonQuery(第五步); 
@@ -366,7 +371,7 @@ namespace WindowsRouteFormD
                                     //}
 
                                     string 第二步 = @"select top 150   convert(varchar(19), 到达时刻,121) 到达时刻,convert(varchar(19), 驶离时刻,121) 驶离时刻,站序 
-                                              from tblRouteRFormX" + DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + @"
+                                              from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
                                               where 内部编号 = '" + 内部编号 + @"'
                                               and 流水号>'" + 流水号 + @"'
                                               and 线路ID = '" + 线路ID + "'  order by 流水号 ";
@@ -412,6 +417,34 @@ namespace WindowsRouteFormD
 
                                                 break;
                                             }
+                                            else
+                                            {
+                                                var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+                                                string rFormXsql = "select    站序,站点名称,方向,convert(varchar(19), 到达时刻,121) 到达时刻  from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + "   where 内部编号='" + 内部编号 + "' order by 流水号 desc ";
+                                                DataTable rFormXData = SqlHelper.ExecuteDataTable(rFormXsql);
+                                                if (rFormXData.Rows.Count > 0)
+                                                {
+
+                                                    if (!终点.Equals(Convert.ToString(rFormXData.Rows[0]["站点名称"]).Trim()))
+                                                    {
+
+                                                        var zc = zds.线路内序号 - zs.线路内序号;
+                                                        var zz = Convert.ToInt32(rFormXData.Rows[0]["站序"]) - zs.线路内序号;
+                                                        double cd = Convert.ToDouble(fs.长度.ToString()) / zc * zz;
+                                                        string 第四步 = "update tblRouteRFormD " +
+                                            "                     set 终点 = '" + Convert.ToString(rFormXData.Rows[0]["站点名称"]) + "'," +
+                                             "                    实际到达时刻 = '" + Convert.ToDateTime(rFormXData.Rows[0]["到达时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                            "                     单程里程 =round('" + cd + "',2) " +
+
+                                            "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+
+                                                        SqlHelper.ExecuteDataTable(第四步);
+                                                    }
+
+                                                }
+
+
+                                            }
                                         }
                                         catch (Exception ex)
                                         {
@@ -431,7 +464,7 @@ namespace WindowsRouteFormD
                 }
 
 
-                //}); 
+                //});
 
 
 
@@ -521,7 +554,7 @@ namespace WindowsRouteFormD
                 }
             });
             threadNonFormD.IsBackground = true;
-            //threadNonFormD.Start();
+            threadNonFormD.Start();
 
 
             ///更新 实际发，实际到，单边里程
@@ -536,16 +569,16 @@ namespace WindowsRouteFormD
             Formd.IsBackground = true;
             Formd.Start();
 
-            DateTime excuteTime = DateTime.Now.AddDays(-1).AddDays(-1).Date;
+            DateTime excuteTime = DateTime.Now.AddDays(-1).Date;
 
             ///处理 ,最后路单的实际到
             Thread threadLastForm = new Thread(() =>
             {
                 while (true)
                 {
-                    if (!excuteTime.Equals(DateTime.Now.AddDays(-1).Date))
+                    if (!excuteTime.Equals(DateTime.Now.Date))
                     {
-                        if (DateTime.Now.AddDays(-1).Hour > 4)
+                        if (DateTime.Now.Hour > 4)
                         {
                             isexcute = true;
                         }
@@ -566,7 +599,7 @@ namespace WindowsRouteFormD
                                     {
                                         if (!formD.Rows[0]["状态"].ToString().Equals("2"))
                                         {
-                                            string formSql = "select top 1 CONVERT(varchar(19), 到达时刻,121) 到达时刻 from tblRouteRFormX" + DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + "  where 内部编号='" + Convert.ToString(row["替换车号"]) + "' and 线路id='" + Convert.ToString(row["ActualRoute"]) + "'      order by 流水号 desc";
+                                            string formSql = "select top 1 CONVERT(varchar(19), 到达时刻,121) 到达时刻 from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + "  where 内部编号='" + Convert.ToString(row["替换车号"]) + "' and 线路id='" + Convert.ToString(row["ActualRoute"]) + "'      order by 流水号 desc";
                                             DataTable rFormXData = SqlHelper.ExecuteDataTable(formSql);
                                             if (rFormXData.Rows.Count > 0)
                                             {
@@ -583,7 +616,7 @@ namespace WindowsRouteFormD
                             }
                         }
                         isexcute = false;
-                        excuteTime = DateTime.Now.AddDays(-1).Date;
+                        excuteTime = DateTime.Now.Date;
                     }
                     Thread.Sleep(100000);
                 }
@@ -617,7 +650,7 @@ namespace WindowsRouteFormD
             {
                 while (true)
                 {
-                    if (_cTime.Date < DateTime.Now.AddDays(-1).Date)
+                    if (_cTime.Date < DateTime.Now.Date)
                         BuildDailyReport();
                     Thread.Sleep(10000);
                 }
@@ -696,7 +729,7 @@ namespace WindowsRouteFormD
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLog("异常:" + ex.Message + "  sql:" + ex.Message + " _dateTime:" + _dateTime.ToString("yyyy-MM-dd") + "  now" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
+                LogHelper.WriteLog("异常:" + ex.Message + "  sql:" + ex.Message + " _dateTime:" + _dateTime.ToString("yyyy-MM-dd") + "  now" + DateTime.Now.ToString("yyyy-MM-dd"));
             }
         }
 
