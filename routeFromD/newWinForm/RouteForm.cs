@@ -53,7 +53,7 @@ namespace WindowsRouteFormD
             //{
             //    if (Convert.ToString(fistShift.Rows[0]["计划发车时间"]).Equals(Convert.ToString(formR["计划发"])))
             //    {
-            //        string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
+            //        string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + 日期 + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
             //        DataTable jsysqldata = SqlHelper.ExecuteDataTable(jsysql);
             //        if (jsysqldata.Rows.Count > 0)
             //        {
@@ -96,13 +96,13 @@ namespace WindowsRouteFormD
         private void RunJsy()
         {
 
-            string sql = "select 内部编号,convert(varchar(19), min(计划发车时刻),121)  计划发车时刻 from tblRouteRFormD where isnull(驾驶员,'')='' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' group by 内部编号";
+            string sql = "select 内部编号,convert(varchar(19), min(计划发车时刻),121)  计划发车时刻 from tblRouteRFormD where isnull(驾驶员,'')='' and 日期='" + 日期 + "' group by 内部编号";
             DataTable data = SqlHelper.ExecuteDataTable(sql);
             for (var i = 0; i < data.Rows.Count; i++)
             {
                 string 内部编号 = Convert.ToString(data.Rows[i]["内部编号"]);
                 string 计划发车时刻 = Convert.ToString(data.Rows[i]["计划发车时刻"]);
-                string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
+                string jsysql = "select top 1 workName from WorkCardRecord where 记录日期='" + 日期 + "' and CardCode='" + 内部编号 + "' order by 记录时刻";
                 DataTable jsysqldata = SqlHelper.ExecuteDataTable(jsysql);
                 if (jsysqldata.Rows.Count > 0)
                 {
@@ -127,7 +127,7 @@ namespace WindowsRouteFormD
             while (true)
             {
                 System.Threading.Thread.Sleep(1000);
-                string sql = "  select 流水号,起点,终点 from tblRouteRFormD where 方向='出场' or 方向='入场' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "' and 状态!=2";
+                string sql = "  select 流水号,起点,终点 from tblRouteRFormD where 方向='出场' or 方向='入场' and 日期='" + 日期 + "' and 状态!=2";
 
                 DataTable sqlData = SqlHelper.ExecuteDataTable(sql);
 
@@ -146,6 +146,8 @@ namespace WindowsRouteFormD
             }
         }
 
+        public string 日期 = "2019-08-13";
+
         /// <summary>
         /// 处理数据
         /// </summary>
@@ -153,16 +155,11 @@ namespace WindowsRouteFormD
         {
             try
             {
-                string 空调 = "0";
-
-                if (DateTime.Now.Month >= 5 && DateTime.Now.Month <= 9)
-                {
-                    空调 = "1";
-                }
+                日期 = "2019-08-13";
 
 
 
-                string sql = "select 线路ID from tblRouteRFormD  where 日期 ='" + DateTime.Now.ToString("yyyy-MM-dd") + "'    group by 线路ID";
+                string sql = "select 线路ID from tblRouteRFormD  where 日期 ='" + 日期 + "'    group by 线路ID";
 
                 var routeData = SqlHelper.ExecuteDataTable(sql);
                 //ParallelLoopResult result = Parallel.ForEach(routeData.AsEnumerable(), (baseRow, pls, longs) =>
@@ -171,7 +168,7 @@ namespace WindowsRouteFormD
                 {
                     string 线路ID = Convert.ToString(baseRow["线路ID"]);
                     sql = "select  流水号,CONVERT(varchar(10),日期,120) 日期,线路ID,内部编号,起点,终点,方向,CONVERT(varchar,计划发车时刻,108) 计划发,驾驶员,ISNULL(状态,0) 状态  from  [tblRouteRFormD] " +
-                                                         "   where ISNULL(状态,0)!=2 and  [线路ID]='" + Convert.ToString(baseRow["线路ID"]) + @"' and  日期='"+DateTime.Now.ToString("yyyy-MM-dd") +"'  and 备注='255'  ";
+                                                         "   where ISNULL(状态,0)!=2 and  [线路ID]='" + Convert.ToString(baseRow["线路ID"]) + @"' and  日期='" + 日期 + "'  and 备注='255' and 内部编号='W0D-033'  ";
                     LogHelper.WriteLog(sql);
 
                     var dt = SqlHelper.ExecuteDataTable(sql);
@@ -184,7 +181,7 @@ namespace WindowsRouteFormD
                             string 内部编号 = Convert.ToString(formR["内部编号"]);
                             string 终点 = Convert.ToString(formR["终点"]);
                             string 方向 = Convert.ToString(formR["方向"]);
-                            string 计划发 = string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(formR["计划发"]));
+                            string 计划发 = string.Format("{0} {1}", 日期, Convert.ToString(formR["计划发"]));
 
                             string 第一步 = @"select  isnull(min(流水号),0) 流水号 from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
                                               where 内部编号 = '" + 内部编号 + @"'
@@ -210,10 +207,345 @@ namespace WindowsRouteFormD
                                 string lbfcsj = string.Empty;
                                 string pbjhlsh = string.Empty;
 
-                                string 查找路牌以及路牌发车时间语句 = "select  流水号,路牌,CONVERT(varchar,计划发车时间,108)  计划发车   from tbldailyplan1 where 内部编号='" + 内部编号 + "' and  CONVERT(varchar,预估发车时间,108)='" + Convert.ToString(formR["计划发"]) + "' and 日期='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+                                string 查找路牌以及路牌发车时间语句 = "select  流水号,路牌,CONVERT(varchar,计划发车时间,108)  计划发车,类型   from tbldailyplan1 where 内部编号='" + 内部编号 + "' and  CONVERT(varchar,预估发车时间,108)='" + Convert.ToString(formR["计划发"]) + "' and 日期='" + 日期 + "'";
                                 var 路牌以及路牌发车时间集合 = SqlHelper.ExecuteDataTable(查找路牌以及路牌发车时间语句);
                                 lb = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["路牌"]);
-                                lbfcsj = string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["计划发车"]));
+                                lbfcsj = string.Format("{0} {1}", 日期, Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["计划发车"]));
+                                pbjhlsh = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["流水号"]);
+                                string 类型 = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["类型"]);
+                                if (Convert.ToString(formR["状态"]).Equals("0"))
+                                {
+                                    string 第二步 = @"select top 20  convert(varchar(19), 到达时刻,121) 到达时刻,convert(varchar(19), 驶离时刻,121) 驶离时刻,站序  
+                                              from tblRouteRFormX" + Convert.ToDateTime(日期).ToString("yyyyMMdd") + @"
+                                              where 内部编号 = '" + 内部编号 + @"'
+                                              and 流水号<='" + 流水号 + @"'
+                                              and 线路ID = '" + 线路ID + "'  order by 流水号 desc ";
+                                    DataTable rTable = SqlHelper.ExecuteDataTable(第二步);
+
+                                    for (int i = 0; i < rTable.Rows.Count; i++)
+                                    {
+                                        try
+                                        {
+                                            if (Convert.ToInt32(rTable.Rows[i]["站序"]) == zs.线路内序号 || Convert.ToInt32(rTable.Rows[i]["站序"]) == zds.线路内序号)
+                                            {
+
+                                                string _dailySql = "select  top 1 流水号,convert(varchar(8), 计划发车时间,108)  AS 计划到达时间,驾驶员,驾驶员编号,售票员,售票员编号 from tbldailyplan1 where CONVERT(varchar,isnull(预估发车时间,计划发车时间),108)>'" + Convert.ToString(formR["计划发"]) + "' and 内部编号='" + Convert.ToString(formR["内部编号"]) + "' order by 计划发车时间";
+                                                var dailyTable = SqlHelper.ExecuteDataTable(_dailySql);
+                                                LogHelper.WriteLog(_dailySql);
+                                                if (dailyTable.Rows.Count > 0)
+                                                {
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", 日期, Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
+                                                    string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
+                                                    string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
+                                                    string 售票员编号 = Convert.ToString(dailyTable.Rows[0]["售票员编号"]);
+
+                                                    if (Convert.ToDateTime(rTable.Rows[i]["驶离时刻"]) > 计划到达时间)
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    string 第四步 = "update tblRouteRFormD " +
+                                                                                                   "                     set 实际发车时刻 = '" + Convert.ToString(rTable.Rows[i]["驶离时刻"]) + "'," +
+                                                                                                   "                         状态=1,计划到达时刻='" + 计划到达时间.ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                                                                                   "                         路牌='" + lb + "'," +
+                                                                                                   "                         路牌计划时刻='" + lbfcsj + "'," +
+
+                                                                                                   "                         驾驶员='" + 驾驶员 + "'," +
+                                                                                                   "                         乘务员='" + 售票员 + "'," +
+                                                                                                   "                         驾驶员工号='" + 驾驶员编号 + "'," +
+                                                                                                   "                         乘务员工号='" + 售票员编号 + "'," +
+                                                                                                    "  类型 = '" + 类型 + "'" +
+                                                                                                   "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                                    SqlHelper.ExuteNonQuery(第四步);
+
+                                                    string 更新实际发车实际到达语句 = "update tbldailyplan1 set 实际发车='" + Convert.ToString(rTable.Rows[i]["驶离时刻"]) + "',实际到达='" + Convert.ToString(rTable.Rows[i]["到达时刻"]) + "'  where 流水号=" + pbjhlsh;
+
+                                                    SqlHelper.ExuteNonQuery(更新实际发车实际到达语句);
+
+                                                    break;
+                                                }
+
+                                            }
+                                            if (Convert.ToInt32(rTable.Rows[i]["站序"]) < zs.线路内序号 || Convert.ToInt32(rTable.Rows[i]["站序"]) > zds.线路内序号)
+                                            {
+                                                string _dailySql = "select top 1 流水号,convert(varchar(8), 计划发车时间,108)  AS 计划到达时间,驾驶员,驾驶员编号,售票员,售票员编号   from tbldailyplan1 where convert(varchar, 计划发车时间,108)>'" + Convert.ToString(formR["计划发"]) + "' and 内部编号='" + Convert.ToString(formR["内部编号"]) + "'  ORDER BY 计划发车时间";
+                                                var dailyTable = SqlHelper.ExecuteDataTable(_dailySql);
+                                                LogHelper.WriteLog(_dailySql);
+                                                if (dailyTable.Rows.Count > 0)
+                                                {
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", 日期, Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
+                                                    string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
+                                                    string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
+                                                    string 售票员编号 = Convert.ToString(dailyTable.Rows[0]["售票员编号"]);
+                                                    if (i > 0)
+                                                    {
+
+                                                        if (Convert.ToDateTime(rTable.Rows[i - 1]["驶离时刻"]) > 计划到达时间)
+                                                        {
+                                                            continue;
+                                                        }
+
+                                                        string 第四步 = "update tblRouteRFormD " +
+                                              "                     set 实际发车时刻 = '" + Convert.ToString(rTable.Rows[i - 1]["驶离时刻"]) + "'," +
+                                              "                         状态=1,计划到达时刻='" + 计划到达时间.ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                              "                         路牌='" + lb + "'," +
+                                              "                         路牌计划时刻='" + lbfcsj + "'," +
+
+                                              "                         驾驶员='" + 驾驶员 + "'," +
+                                              "                         乘务员='" + 售票员 + "'," +
+                                              "                         驾驶员工号='" + 驾驶员编号 + "'," +
+                                              "                         乘务员工号='" + 售票员编号 + "'," +
+                                                                                                    "  类型 = '" + 类型 + "'" +
+                                              "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                                        SqlHelper.ExuteNonQuery(第四步);
+
+                                                        string 更新实际发车实际到达语句 = "update tbldailyplan1 set 实际发车='" + Convert.ToString(rTable.Rows[i]["驶离时刻"]) + "',实际到达='" + Convert.ToString(rTable.Rows[i]["到达时刻"]) + "'    where 流水号=" + pbjhlsh;
+
+                                                        SqlHelper.ExuteNonQuery(更新实际发车实际到达语句);
+
+
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (Convert.ToDateTime(rTable.Rows[i]["驶离时刻"]) > 计划到达时间)
+                                                        {
+                                                            continue;
+                                                        }
+                                                        string 第四步 = "update tblRouteRFormD " +
+                                                    "                     set 实际发车时刻 = '" + Convert.ToString(rTable.Rows[i]["驶离时刻"]) + "'," +
+                                                    "                         状态=1,计划到达时刻='" + 计划到达时间.ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                                    "                         路牌='" + lb + "'," +
+                                                    "                         路牌计划时刻='" + lbfcsj + "'," +
+
+                                                    "                         驾驶员='" + 驾驶员 + "'," +
+                                                    "                         乘务员='" + 售票员 + "'," +
+                                                    "                         乘务员工号='" + 售票员编号 + "'," +
+                                                                                                    "  类型 = '" + 类型 + "'" +
+                                                    "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                                        SqlHelper.ExuteNonQuery(第四步);
+
+
+                                                        string 更新实际发车实际到达语句 = "update tbldailyplan1 set 实际发车='" + Convert.ToString(rTable.Rows[i]["驶离时刻"]) + "',实际到达='" + Convert.ToString(rTable.Rows[i]["到达时刻"]) + "'   where 流水号=" + pbjhlsh;
+
+                                                        SqlHelper.ExuteNonQuery(更新实际发车实际到达语句);
+
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            //E(ex.ToString());
+                                            var esss = ex;
+                                            LogHelper.WriteLog("错误信息" + ex.ToString() + ",流水号:" + Convert.ToString(formR["流水号"]));
+                                        }
+                                    }
+                                }
+                                else if (Convert.ToString(formR["状态"]).Equals("1"))
+                                {
+                                    //string plansql = "select top 1 CONVERT(varchar,isnull(预估发车时间,计划发车时间),108)  as 计划发车时间,CONVERT(varchar(8), 计划到达时间,108) as 计划到达时间 from tbldailyplan1 where 替换车号='" + 内部编号 + @"' and ActualRoute='" + 线路ID + "' order by 计划发车时间 desc";
+
+                                    /////最后班次
+                                    //DataTable lastplans = SqlHelper.ExecuteDataTable(plansql);
+                                    //if (lastplans.Rows.Count > 0)
+                                    //{
+                                    //    if (Convert.ToString(formR["计划发"]).Equals(lastplans.Rows[0]["计划发车时间"]))
+                                    //    {
+
+                                    //        var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+
+
+                                    //        string 第五步 = "update tblRouteRFormD " +
+                                    //       "            set 实际到达时刻 = '" + string.Format("{0} {1}", 日期, Convert.ToString(lastplans.Rows[0]["计划到达时间"])) + "'," +
+                                    //       "                状态=2,单程里程='" + fs.长度 + "'" +
+                                    //       "   where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                    //        SqlHelper.ExuteNonQuery(第五步); 
+
+
+                                    //        continue;
+                                    //    }
+
+                                    //}
+
+                                    string 第二步 = @"select top 150   convert(varchar(19), 到达时刻,121) 到达时刻,convert(varchar(19), 驶离时刻,121) 驶离时刻,站序 
+                                              from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
+                                              where 内部编号 = '" + 内部编号 + @"'
+                                              and 流水号>'" + 流水号 + @"'
+                                              and 线路ID = '" + 线路ID + "'  order by 流水号 ";
+                                    DataTable rTable = SqlHelper.ExecuteDataTable(第二步);
+                                    LogHelper.WriteLog(第二步);
+                                    for (int i = 0; i < rTable.Rows.Count; i++)
+                                    {
+                                        try
+                                        {
+                                            if (Convert.ToInt32(rTable.Rows[i]["站序"]) == zs.线路内序号 || Convert.ToInt32(rTable.Rows[i]["站序"]) == zds.线路内序号)
+                                            {
+                                                var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+                                                string 第四步 = "update tblRouteRFormD " +
+                                                "                     set 实际到达时刻 = '" + Convert.ToDateTime(rTable.Rows[i]["到达时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                                "                         状态=2,单程里程='" + fs.长度 + "'" +
+                                                "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                                SqlHelper.ExuteNonQuery(第四步);
+
+                                            }
+                                            else if (Convert.ToInt32(rTable.Rows[i]["站序"]) < zs.线路内序号 || Convert.ToInt32(rTable.Rows[i]["站序"]) > zds.线路内序号)
+                                            {
+                                                if (i == 0)
+                                                {
+                                                    var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+                                                    string 第四步 = "update tblRouteRFormD " +
+                                                    "                     set 实际到达时刻 = '" + Convert.ToDateTime(rTable.Rows[i]["到达时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                                    "                         状态=2,单程里程='" + fs.长度 + "'" +
+                                                    "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+                                                    LogHelper.WriteLog(第四步);
+
+                                                }
+                                                else
+                                                {
+                                                    var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+                                                    string 第四步 = "update tblRouteRFormD " +
+                                                    "                     set 实际到达时刻 = '" + Convert.ToDateTime(rTable.Rows[i - 1]["到达时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                                    "                         状态=2,单程里程='" + fs.长度 + "'" +
+                                                    "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+
+                                                    SqlHelper.ExuteNonQuery(第四步);
+
+                                                }
+
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                var fs = _routeS.FirstOrDefault(t => t.线路 == 线路ID && t.方向 == 方向);
+                                                string rFormXsql = "select    站序,站点名称,方向,convert(varchar(19), 到达时刻,121) 到达时刻  from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + "   where 内部编号='" + 内部编号 + "' order by 流水号 desc ";
+                                                DataTable rFormXData = SqlHelper.ExecuteDataTable(rFormXsql);
+                                                if (rFormXData.Rows.Count > 0)
+                                                {
+
+                                                    if (!终点.Equals(Convert.ToString(rFormXData.Rows[0]["站点名称"]).Trim()))
+                                                    {
+
+                                                        var zc = zds.线路内序号 - zs.线路内序号;
+                                                        var zz = Convert.ToInt32(rFormXData.Rows[0]["站序"]) - zs.线路内序号;
+                                                        double cd = Convert.ToDouble(fs.长度.ToString()) / zc * zz;
+                                                        string 第四步 = "update tblRouteRFormD " +
+                                            "                     set 终点 = '" + Convert.ToString(rFormXData.Rows[0]["站点名称"]) + "'," +
+                                             "                    实际到达时刻 = '" + Convert.ToDateTime(rFormXData.Rows[0]["到达时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "'," +
+                                            "                     单程里程 =round('" + cd + "',2) " +
+
+                                            "             where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
+
+                                                        SqlHelper.ExecuteDataTable(第四步);
+                                                    }
+
+                                                }
+
+
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            LogHelper.WriteLog("错误信息" + ex.ToString() + ",流水号:" + Convert.ToString(formR["流水号"]));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            //E(ex.ToString());
+                            //var esss = ex;
+                            LogHelper.WriteLog("错误信息" + ex.ToString() + ",流水号:" + Convert.ToString(formR["流水号"]));
+                        }
+                    }
+                }
+
+
+                //});
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLog("错误信息" + ex.ToString());
+
+            }
+        }
+
+        /// <summary>
+        /// 处理数据
+        /// </summary>
+        private void ProcessData1()
+        {
+            try
+            {
+                string 空调 = "0";
+
+                if (DateTime.Now.Month >= 5 && DateTime.Now.Month <= 9)
+                {
+                    空调 = "1";
+                }
+
+
+
+                string sql = "select 线路ID from tblRouteRFormD  where 日期 ='" + 日期 + "'    group by 线路ID";
+
+                var routeData = SqlHelper.ExecuteDataTable(sql);
+                //ParallelLoopResult result = Parallel.ForEach(routeData.AsEnumerable(), (baseRow, pls, longs) =>
+                //{
+                foreach (DataRow baseRow in routeData.Rows)
+                {
+                    string 线路ID = Convert.ToString(baseRow["线路ID"]);
+                    sql = "select  流水号,CONVERT(varchar(10),日期,120) 日期,线路ID,内部编号,起点,终点,方向,CONVERT(varchar,计划发车时刻,108) 计划发,驾驶员,ISNULL(状态,0) 状态  from  [tblRouteRFormD] " +
+                                                         "   where ISNULL(状态,0)!=2 and  [线路ID]='" + Convert.ToString(baseRow["线路ID"]) + @"' and  日期='" + 日期 + "'  and 备注='255'  ";
+                    LogHelper.WriteLog(sql);
+
+                    var dt = SqlHelper.ExecuteDataTable(sql);
+
+                    foreach (DataRow formR in dt.Rows)
+                    {
+                        R("线路ID:" + Convert.ToString(baseRow["线路ID"]) + "\n\r" + "  流水号:" + Convert.ToString(formR["流水号"]));
+                        try
+                        {
+                            string 内部编号 = Convert.ToString(formR["内部编号"]);
+                            string 终点 = Convert.ToString(formR["终点"]);
+                            string 方向 = Convert.ToString(formR["方向"]);
+                            string 计划发 = string.Format("{0} {1}", 日期, Convert.ToString(formR["计划发"]));
+
+                            string 第一步 = @"select  isnull(min(流水号),0) 流水号 from tblRouteRFormX" + DateTime.Now.ToString("yyyyMMdd") + @"
+                                              where 内部编号 = '" + 内部编号 + @"'
+                                              and 驶离时刻>'" + 计划发 + @"'
+                                              and 方向='" + Convert.ToString(formR["方向"]) + @"'
+                                              and 线路ID = '" + 线路ID + "'  order by 流水号";
+
+                            DataTable table = SqlHelper.ExecuteDataTable(第一步);
+
+                            var rRgs = _routeSRangeS.Where(t => t.线路 == 线路ID && t.类型.Contains(方向)).ToList();
+                            if (rRgs.Count == 0)
+                            {
+                                continue;
+                            }
+                            if (table.Rows.Count > 0)
+                            {
+                                string cs = 方向 + "始发";
+                                string 流水号 = Convert.ToString(table.Rows[0]["流水号"]);
+                                var zs = _routeSRangeS.FirstOrDefault(t => t.线路 == 线路ID && t.类型 == cs);
+                                string zd = 方向 + "终点";
+                                var zds = _routeSRangeS.FirstOrDefault(t => t.线路 == 线路ID && t.类型 == zd);
+                                string lb = string.Empty;
+                                string lbfcsj = string.Empty;
+                                string pbjhlsh = string.Empty;
+
+                                string 查找路牌以及路牌发车时间语句 = "select  流水号,路牌,CONVERT(varchar,计划发车时间,108)  计划发车   from tbldailyplan1 where 内部编号='" + 内部编号 + "' and  CONVERT(varchar,预估发车时间,108)='" + Convert.ToString(formR["计划发"]) + "' and 日期='" + 日期 + "'";
+                                var 路牌以及路牌发车时间集合 = SqlHelper.ExecuteDataTable(查找路牌以及路牌发车时间语句);
+                                lb = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["路牌"]);
+                                lbfcsj = string.Format("{0} {1}", 日期, Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["计划发车"]));
                                 pbjhlsh = Convert.ToString(路牌以及路牌发车时间集合.Rows[0]["流水号"]);
 
                                 if (Convert.ToString(formR["状态"]).Equals("0"))
@@ -237,7 +569,7 @@ namespace WindowsRouteFormD
                                                 LogHelper.WriteLog(_dailySql);
                                                 if (dailyTable.Rows.Count > 0)
                                                 {
-                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", 日期, Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
                                                     string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
                                                     string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
                                                     string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
@@ -275,7 +607,7 @@ namespace WindowsRouteFormD
                                                 LogHelper.WriteLog(_dailySql);
                                                 if (dailyTable.Rows.Count > 0)
                                                 {
-                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
+                                                    DateTime 计划到达时间 = Convert.ToDateTime(string.Format("{0} {1}", 日期, Convert.ToString(dailyTable.Rows[0]["计划到达时间"])));
                                                     string 驾驶员 = Convert.ToString(dailyTable.Rows[0]["驾驶员"]);
                                                     string 驾驶员编号 = Convert.ToString(dailyTable.Rows[0]["驾驶员编号"]);
                                                     string 售票员 = Convert.ToString(dailyTable.Rows[0]["售票员"]);
@@ -359,7 +691,7 @@ namespace WindowsRouteFormD
 
 
                                     //        string 第五步 = "update tblRouteRFormD " +
-                                    //       "            set 实际到达时刻 = '" + string.Format("{0} {1}", DateTime.Now.ToString("yyyy-MM-dd"), Convert.ToString(lastplans.Rows[0]["计划到达时间"])) + "'," +
+                                    //       "            set 实际到达时刻 = '" + string.Format("{0} {1}", 日期, Convert.ToString(lastplans.Rows[0]["计划到达时间"])) + "'," +
                                     //       "                状态=2,单程里程='" + fs.长度 + "'" +
                                     //       "   where  流水号='" + Convert.ToString(formR["流水号"]) + "'";
                                     //        SqlHelper.ExuteNonQuery(第五步); 
@@ -729,7 +1061,7 @@ namespace WindowsRouteFormD
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLog("异常:" + ex.Message + "  sql:" + ex.Message + " _dateTime:" + _dateTime.ToString("yyyy-MM-dd") + "  now" + DateTime.Now.ToString("yyyy-MM-dd"));
+                LogHelper.WriteLog("异常:" + ex.Message + "  sql:" + ex.Message + " _dateTime:" + _dateTime.ToString("yyyy-MM-dd") + "  now" + 日期);
             }
         }
 

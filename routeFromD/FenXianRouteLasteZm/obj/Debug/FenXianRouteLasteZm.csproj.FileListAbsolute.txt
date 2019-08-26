@@ -20,7 +20,6 @@ D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\bin\Debug\DB
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\bin\Debug\Newtonsoft.Json.dll
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\bin\Debug\DB.pdb
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\bin\Debug\Newtonsoft.Json.xml
-D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.csprojAssemblyReference.cache
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.Form1.resources
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.Properties.Resources.resources
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.csproj.GenerateResource.cache
@@ -28,3 +27,4 @@ D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\Fe
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.csproj.CopyComplete
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.exe
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.pdb
+D:\workplace\陈金华\window\window\routeFromD\FenXianRouteLasteZm\obj\Debug\FenXianRouteLasteZm.csprojAssemblyReference.cache

@@ -16,7 +16,6 @@ D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\bin\Debug\FenX
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\bin\Debug\FenXianRouteFromD.pdb
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\bin\Debug\DB.dll
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\bin\Debug\DB.pdb
-D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.csprojAssemblyReference.cache
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.Form1.resources
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.Properties.Resources.resources
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.csproj.GenerateResource.cache
