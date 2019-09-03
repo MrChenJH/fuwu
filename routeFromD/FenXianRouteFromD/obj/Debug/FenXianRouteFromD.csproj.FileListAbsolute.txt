@@ -23,3 +23,4 @@ D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenX
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.csproj.CopyComplete
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.exe
 D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.pdb
+D:\workplace\陈金华\window\window\routeFromD\FenXianRouteFromD\obj\Debug\FenXianRouteFromD.csprojAssemblyReference.cache
