@@ -30,7 +30,6 @@ D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\Wind
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.WindowsRouteFormD.resources
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.Properties.Resources.resources
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.csproj.GenerateResource.cache
-D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.csproj.CoreCompileInputs.cache
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.csproj.CopyComplete
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.exe
 D:\workplace\陈金华\window\window\routeFromD\WindowsRouteFormD\obj\Debug\WindowsRouteFormD.pdb
