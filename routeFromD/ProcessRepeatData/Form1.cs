@@ -39,14 +39,24 @@ namespace ProcessRepeatData
             string hour = "23:30";
             string strHourTime = string.Format("{0} {1}", time, hour);
 
-            schedule.Add(分 * 2, Convert.ToDateTime(strHourTime), delegate
-             {
-                 processRepeat();
-             }).Add(时 * 24,
-             Convert.ToDateTime(strHourTime), delegate
-             {
-                 processRepeat();
-             }).Start();
+            new System.Threading.Thread(() =>
+            {
+                while (true)
+                {
+                    processRepeat();
+                    System.Threading.Thread.Sleep(1000 * 60 * 3);
+                }
+
+            }).Start();
+
+            //schedule.Add(分 * 2, Convert.ToDateTime(strHourTime), delegate
+            // {
+            //     processRepeat();
+            // }).Add(时 * 24,
+            // Convert.ToDateTime(strHourTime), delegate
+            // {
+            //     processRepeat();
+            // }).Start();
         }
 
         /// <summary>
@@ -61,34 +71,46 @@ namespace ProcessRepeatData
             DataTable repeatData = SqlHelper.ExecuteDataTable(sql);
             foreach (DataRow row in repeatData.Rows)
             {
-                string excuteSql = "select 流水号 from  tblRouteRFormD where 内部编号='" + row["内部编号"].ToString() + "' and 计划发车时刻='" + Convert.ToDateTime(row["计划发车时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "' and 方向='" + row["方向"].ToString() + "'";
+                string excuteSql = "select 流水号,线路ID from  tblRouteRFormD where 内部编号='" + row["内部编号"].ToString() + "' and 计划发车时刻='" + Convert.ToDateTime(row["计划发车时刻"]).ToString("yyyy-MM-dd HH:mm:ss") + "' and 方向='" + row["方向"].ToString() + "' ";
                 DataTable msData = SqlHelper.ExecuteDataTable(excuteSql);
-                if (msData.Rows.Count > 1)
+
+                if (msData.Rows.Count > 0)
                 {
-                    textBox1.Text = msData.Rows[0]["流水号"].ToString();
-                    string deleteSql = "delete tblRouteRFormD where 流水号=" + msData.Rows[0]["流水号"].ToString();
-                    SqlHelper.ExuteNonQuery(deleteSql);
+
+                    bool isexists = false;
+                    foreach (DataRow msRow in msData.Rows)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            textBox1.Text = msRow["流水号"].ToString();
+                        }));
+
+                        string selectDplsql = "select ActualRoute from  tbldailyplan1 where ActualRoute='" + msRow["线路ID"].ToString() + "' and 替换车号='" + row["内部编号"].ToString() + "' and CONVERT(varchar, isnull(调整时刻,计划发车时间),108)='" + Convert.ToDateTime(row["计划发车时刻"]).ToString("HH:mm:ss") + "'";
+                        DataTable dt = SqlHelper.ExecuteDataTable(selectDplsql);
+                        if (dt.Rows.Count == 0)
+                        {
+                            string deleteSql01 = "delete tblRouteRFormD where 流水号=" + msRow["流水号"].ToString();
+                            SqlHelper.ExuteNonQuery(deleteSql01);
+                            isexists = true;
+                            break;
+                        }
+                    }
+
+
+                    if (!isexists)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            textBox1.Text = msData.Rows[0]["流水号"].ToString();
+                        }));
+                        string deleteSql01 = "delete tblRouteRFormD where 流水号=" + msData.Rows[0]["流水号"].ToString();
+                        SqlHelper.ExuteNonQuery(deleteSql01);
+                    }
                 }
+
             }
         }
 
-        private void bakOnline()
-        {
-            string sql = @"INSERT INTO [dbo].[tblOnlineVehicleRecording]
-           ([日期]
-           ,[内部编号]
-           ,[最后通信时间])
-             select 
-              '" + DateTime.Now.ToString("yyyy-MM-dd") + @"',
-             SRCID,
-             max(UpdateTime) 通信日期 
-             from  tblCommData20181211 where 命令字 = 65
-             group by SRCID ";
 
-            while (true)
-            {  
-                SqlHelper.ExuteNonQuery(sql);
-            }
-        }
     }
 }
